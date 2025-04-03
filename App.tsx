@@ -1,56 +1,20 @@
-import {
-  ViroARScene,
-  ViroARSceneNavigator,
-  ViroText,
-  ViroTrackingReason,
-  ViroTrackingStateConstants,
-} from "@reactvision/react-viro";
 import React, { useState } from "react";
-import { StyleSheet } from "react-native";
+import { View } from "react-native";
+import LoadingScreen from "./Screens/LoadingScreen";
+import ARScene from "./Screens/ARScene";
 
-const HelloWorldSceneAR = () => {
-  const [text, setText] = useState("Initializing AR...");
-
-  function onInitialized(state: any, reason: ViroTrackingReason) {
-    console.log("onInitialized", state, reason);
-    if (state === ViroTrackingStateConstants.TRACKING_NORMAL) {
-      setText("Hello World!");
-    } else if (state === ViroTrackingStateConstants.TRACKING_UNAVAILABLE) {
-      // Handle loss of tracking
-    }
-  }
+const App = () => {
+  const [isLoaded, setIsLoaded] = useState(false);
 
   return (
-    <ViroARScene onTrackingUpdated={onInitialized}>
-      <ViroText
-        text={text}
-        scale={[0.5, 0.5, 0.5]}
-        position={[0, 0, -1]}
-        style={styles.helloWorldTextStyle}
-      />
-    </ViroARScene>
+    <View style={{ flex: 1 }}>
+      {!isLoaded ? (
+        <LoadingScreen onFinishLoading={() => setIsLoaded(true)} />
+      ) : (
+        <ARScene />
+      )}
+    </View>
   );
 };
 
-export default () => {
-  return (
-    <ViroARSceneNavigator
-      autofocus={true}
-      initialScene={{
-        scene: HelloWorldSceneAR,
-      }}
-      style={styles.f1}
-    />
-  );
-};
-
-var styles = StyleSheet.create({
-  f1: { flex: 1 },
-  helloWorldTextStyle: {
-    fontFamily: "Arial",
-    fontSize: 30,
-    color: "#ffffff",
-    textAlignVertical: "center",
-    textAlign: "center",
-  },
-});
+export default App;
