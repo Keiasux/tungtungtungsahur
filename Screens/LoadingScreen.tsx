@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { View, Image, Animated, StyleSheet } from "react-native";
 
 interface LoadingScreenProps {
-  onFinishLoading: () => void;
+  onDone: () => void;
 }
 
-const LoadingScreen: React.FC<LoadingScreenProps> = ({ onFinishLoading }) => {
+const LoadingScreen: React.FC<LoadingScreenProps> = ({ onDone }) => {
   const [progress] = useState(new Animated.Value(0));
 
   useEffect(() => {
@@ -13,31 +13,25 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onFinishLoading }) => {
       toValue: 1,
       duration: 3000,
       useNativeDriver: false,
-    }).start(() => onFinishLoading());
-  }, [onFinishLoading]);
+    }).start(() => {
+      onDone();
+    });
+  }, [onDone]);
 
   const progressInterpolation = progress.interpolate({
     inputRange: [0, 1],
-    outputRange: ["0%", "85%"], // Progress bar fills up
-  });
-
-  const cartPosition = progress.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0%", "85%"], // Cart moves along with progress
+    outputRange: ["0%", "85%"],
   });
 
   return (
     <View style={styles.container}>
       <View style={styles.progressBarContainer}>
-        {/* Progress Bar */}
         <Animated.View
           style={[styles.progressBar, { width: progressInterpolation }]}
         />
-
-        {/* Moving Cart Icon */}
-        <Animated.Image
+        <Image
           source={require("../assets/cart_icon.png")}
-          style={[styles.cartIcon, { left: cartPosition }]}
+          style={styles.cartIcon}
         />
       </View>
     </View>
@@ -59,18 +53,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     overflow: "hidden",
-    position: "relative",
   },
   progressBar: {
     height: "100%",
     backgroundColor: "#4D3B30",
-    position: "absolute",
-    left: 0,
   },
   cartIcon: {
     width: 30,
     height: 30,
     position: "absolute",
+    right: 5,
   },
 });
 
