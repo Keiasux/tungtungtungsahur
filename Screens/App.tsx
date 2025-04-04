@@ -3,8 +3,9 @@ import ShopfurScreen from "./FURARd";
 import LoadingScreen from "./LoadingScreen";
 import ARScene from "./ARScene";
 import CartScreen from "./CartScreen";
+import HomeScreen from "./Home"; // 👈 Import your new HomeScreen
 
-type Screen = "loading" | "shopfur" | "ar" | "cart";
+type Screen = "loading" | "home" | "shopfur" | "ar" | "cart"; // 👈 Add "home"
 
 export interface CartItem {
   id: number;
@@ -48,11 +49,20 @@ const App = () => {
     cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
   if (screen === "loading")
-    return <LoadingScreen onDone={() => setScreen("shopfur")} />;
+    return <LoadingScreen onDone={() => setScreen("home")} />; // 👈 Go to home after loading
+
+  if (screen === "home")
+    return (
+      <HomeScreen
+        onCart={() => setScreen("cart")} // 👈 Tells HomeScreen how to go to cart
+        onEnterShop={() => setScreen("shopfur")}
+      />
+    );
 
   if (screen === "shopfur")
     return (
       <ShopfurScreen
+        home={() => setScreen("home")}
         onAR={() => setScreen("ar")}
         onCart={() => setScreen("cart")}
         addToCart={() =>
@@ -73,6 +83,8 @@ const App = () => {
     );
 
   if (screen === "ar") return <ARScene />;
+
+  return null;
 };
 
 export default App;

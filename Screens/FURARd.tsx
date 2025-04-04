@@ -5,12 +5,14 @@ interface ShopfurScreenProps {
   onAR: () => void;
   onCart: () => void;
   addToCart: () => void;
+  home: () => void;
 }
 
 const ShopfurScreen: React.FC<ShopfurScreenProps> = ({
   onAR,
   onCart,
   addToCart,
+  home,
 }) => {
   return (
     <View style={styles.container}>
@@ -48,7 +50,9 @@ const ShopfurScreen: React.FC<ShopfurScreenProps> = ({
 
       <View style={styles.bottomNav}>
         <Text style={styles.navIcon}>👤</Text>
-        <Text style={styles.navIcon}>🏠</Text>
+        <TouchableOpacity onPress={home}>
+          <Text style={styles.navIcon}>🏠</Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={onCart}>
           <Text style={styles.navIcon}>🛒</Text>
         </TouchableOpacity>
