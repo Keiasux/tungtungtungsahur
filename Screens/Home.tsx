@@ -1,19 +1,109 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import React, { useState, useRef } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Animated,
+  Dimensions,
+} from "react-native";
+import type { Screen } from "../types"; // ✅ path depends on your folder structure
 
 interface HomeScreenProps {
   onEnterShop?: () => void;
-  onCart?: () => void; // 👈 Add this
+  onCart?: () => void;
+  goToScreen?: (screen: Screen) => void; // ✅ FIXED TYPE
 }
 
-const HomeScreen: React.FC<HomeScreenProps> = ({ onEnterShop, onCart }) => {
+const HomeScreen: React.FC<HomeScreenProps> = ({
+  onEnterShop,
+  onCart,
+  goToScreen,
+}) => {
+  const screenWidth = Dimensions.get("window").width;
+  const [menuVisible, setMenuVisible] = useState(false);
+  const slideAnim = useRef(new Animated.Value(-screenWidth)).current;
+
+  const toggleMenu = () => {
+    if (menuVisible) {
+      Animated.timing(slideAnim, {
+        toValue: -screenWidth,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => setMenuVisible(false));
+    } else {
+      setMenuVisible(true);
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  };
+
   return (
     <View style={styles.container}>
+      {/* Drawer Menu */}
+      {menuVisible && (
+        <TouchableOpacity
+          style={styles.backdrop}
+          activeOpacity={1}
+          onPress={toggleMenu}
+        >
+          <Animated.View
+            style={[
+              styles.drawer,
+              {
+                transform: [{ translateX: slideAnim }],
+              },
+            ]}
+          >
+            <Text style={styles.drawerTitle}>Living Room Furniture</Text>
+
+            <TouchableOpacity
+              style={styles.drawerItem}
+              onPress={() => {
+                goToScreen?.("chair");
+                toggleMenu();
+              }}
+            >
+              <Text style={styles.drawerIcon}>🪑</Text>
+              <Text style={styles.drawerLabel}>Chair</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.drawerItem}
+              onPress={() => {
+                goToScreen?.("sofa");
+                toggleMenu();
+              }}
+            >
+              <Text style={styles.drawerIcon}>🛋️</Text>
+              <Text style={styles.drawerLabel}>Sofa</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.drawerItem}
+              onPress={() => {
+                goToScreen?.("tvstand");
+                toggleMenu();
+              }}
+            >
+              <Text style={styles.drawerIcon}>📺</Text>
+              <Text style={styles.drawerLabel}>TV Stand</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </TouchableOpacity>
+      )}
+
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerIcon}>☰</Text>
+        <TouchableOpacity onPress={toggleMenu}>
+          <Text style={styles.headerIcon}>☰</Text>
+        </TouchableOpacity>
         <Image
-          source={require("../assets/cart_icon.png")} // Replace with actual logo
+          source={require("../assets/cart_icon.png")}
           style={styles.logoImage}
           resizeMode="contain"
         />
@@ -22,7 +112,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onEnterShop, onCart }) => {
 
       {/* Main Content */}
       <View style={styles.mainContent}>
-        {/* Tabs */}
         <View style={styles.tabsContainer}>
           {["Study Room", "Bedroom", "Living Room", "Dining"].map((label) => (
             <View style={styles.tab} key={label}>
@@ -31,16 +120,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onEnterShop, onCart }) => {
           ))}
         </View>
 
-        {/* Image Slider */}
         <View style={styles.imageSlider}>
           <Image
-            source={require("../assets/cart_icon.png")} // Replace with actual image
+            source={require("../assets/cart_icon.png")}
             style={styles.sliderImage}
             resizeMode="cover"
           />
         </View>
 
-        {/* Categories */}
         <Text style={styles.sectionTitle}>Shop by Category</Text>
         <View style={styles.categoryGrid}>
           {[
@@ -63,22 +150,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onEnterShop, onCart }) => {
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => {
-            /* go to Profile */
-          }}
-        >
+        <TouchableOpacity style={styles.navItem}>
           <Text style={styles.navIcon}>👤</Text>
           <Text style={styles.navLabel}>Profile</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => {
-            /* go to Home */
-          }}
-        >
+        <TouchableOpacity style={styles.navItem}>
           <Text style={styles.navIcon}>🏠</Text>
           <Text style={styles.navLabel}>Home</Text>
         </TouchableOpacity>
@@ -88,12 +165,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onEnterShop, onCart }) => {
           <Text style={styles.navLabel}>Cart</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => {
-            /* go to Inbox */
-          }}
-        >
+        <TouchableOpacity style={styles.navItem}>
           <Text style={styles.navIcon}>📥</Text>
           <Text style={styles.navLabel}>Inbox</Text>
         </TouchableOpacity>
@@ -198,5 +270,44 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 12,
     marginTop: 2,
+  },
+  drawer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "70%",
+    height: "100%",
+    backgroundColor: "#3E2E22",
+    padding: 20,
+    zIndex: 2,
+  },
+  drawerTitle: {
+    color: "white",
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  drawerItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  drawerIcon: {
+    fontSize: 20,
+    marginRight: 12,
+    color: "white",
+  },
+  drawerLabel: {
+    fontSize: 18,
+    color: "white",
+  },
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    zIndex: 1,
   },
 });

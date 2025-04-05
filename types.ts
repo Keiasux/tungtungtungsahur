@@ -4,3 +4,12 @@ export type RootStackParamList = {
     ARViewScreen: undefined;
   };
   
+  export type Screen =
+  | "loading"
+  | "home"
+  | "shopfur"
+  | "ar"
+  | "cart"
+  | "chair"
+  | "sofa"
+  | "tvstand"

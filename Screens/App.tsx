@@ -1,11 +1,25 @@
+// ✅ App.tsx
 import React, { useState } from "react";
 import ShopfurScreen from "./FURARd";
 import LoadingScreen from "./LoadingScreen";
 import ARScene from "./ARScene";
 import CartScreen from "./CartScreen";
-import HomeScreen from "./Home"; // 👈 Import your new HomeScreen
+import HomeScreen from "./Home";
+import ChairScreen from "./Chair";
+import SofaScreen from "./Sofa";
+import TVStandScreen from "./TVStand";
 
-type Screen = "loading" | "home" | "shopfur" | "ar" | "cart"; // 👈 Add "home"
+export type Screen =
+  | "loading"
+  | "home"
+  | "shopfur"
+  | "ar"
+  | "cart"
+  | "chair"
+  | "sofa"
+  | "tvstand"
+  | "profile"
+  | "inbox";
 
 export interface CartItem {
   id: number;
@@ -49,13 +63,14 @@ const App = () => {
     cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
   if (screen === "loading")
-    return <LoadingScreen onDone={() => setScreen("home")} />; // 👈 Go to home after loading
+    return <LoadingScreen onDone={() => setScreen("home")} />;
 
   if (screen === "home")
     return (
       <HomeScreen
-        onCart={() => setScreen("cart")} // 👈 Tells HomeScreen how to go to cart
+        onCart={() => setScreen("cart")}
         onEnterShop={() => setScreen("shopfur")}
+        goToScreen={setScreen}
       />
     );
 
@@ -83,6 +98,22 @@ const App = () => {
     );
 
   if (screen === "ar") return <ARScene />;
+
+  if (screen === "chair")
+    return (
+      <ChairScreen goBack={() => setScreen("home")} goToScreen={setScreen} />
+    );
+  if (screen === "sofa")
+    return (
+      <SofaScreen goBack={() => setScreen("home")} goToScreen={setScreen} />
+    );
+  if (screen === "tvstand")
+    return (
+      <TVStandScreen goBack={() => setScreen("home")} goToScreen={setScreen} />
+    );
+
+  if (screen === "profile") return <HomeScreen goToScreen={setScreen} />; // placeholder for profile
+  if (screen === "inbox") return <HomeScreen goToScreen={setScreen} />; // placeholder for inbox
 
   return null;
 };
