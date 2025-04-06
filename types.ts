@@ -1,10 +1,4 @@
-export type RootStackParamList = {
-    Loading: undefined;
-    Shopfur: undefined;
-    ARViewScreen: undefined;
-  };
-  
-  export type Screen =
+export type Screen =
   | "loading"
   | "home"
   | "shopfur"
@@ -13,3 +7,16 @@ export type RootStackParamList = {
   | "chair"
   | "sofa"
   | "tvstand"
+  | "furniture"
+  | "livingroom"
+  | "bedroom"
+  | "diningroom"
+  | "Desks"
+  | "Wardrobe"
+  | "Bed"
+  | "DiningTable"
+  | "Cabinet"
+  | "DiningChair"
+  | "broomt"
+  | "droomt"
+

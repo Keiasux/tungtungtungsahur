@@ -1,13 +1,15 @@
-// ✅ App.tsx
 import React, { useState } from "react";
-import ShopfurScreen from "./FURARd";
 import LoadingScreen from "./LoadingScreen";
 import ARScene from "./ARScene";
 import CartScreen from "./CartScreen";
 import HomeScreen from "./Home";
-import ChairScreen from "./Chair";
-import SofaScreen from "./Sofa";
-import TVStandScreen from "./TVStand";
+import FurnitureScreen from "./FurnitureScreen";
+import LivingRoomScreen from "./LRf";
+import BRoomScreen from "./BRf";
+import DRoomScreen from "./Dr";
+import ShopfurScreen from "./FURARd";
+import BRoomtScreen from "./BRFt";
+import DRoomtScreen from "./Drt";
 
 export type Screen =
   | "loading"
@@ -19,7 +21,19 @@ export type Screen =
   | "sofa"
   | "tvstand"
   | "profile"
-  | "inbox";
+  | "inbox"
+  | "furniture"
+  | "livingroom"
+  | "bedroom"
+  | "diningroom"
+  | "Desks"
+  | "Wardrobe"
+  | "Bed"
+  | "DiningTable"
+  | "Cabinet"
+  | "DiningChair"
+  | "broomt"
+  | "droomt";
 
 export interface CartItem {
   id: number;
@@ -74,15 +88,13 @@ const App = () => {
       />
     );
 
-  if (screen === "shopfur")
+  if (["chair", "sofa", "tvstand"].includes(screen))
     return (
       <ShopfurScreen
-        home={() => setScreen("home")}
+        category={screen as "chair" | "sofa" | "tvstand"}
+        goToScreen={setScreen}
+        addToCart={(item) => addToCart({ ...item, quantity: 1 })}
         onAR={() => setScreen("ar")}
-        onCart={() => setScreen("cart")}
-        addToCart={() =>
-          addToCart({ id: 1, name: "Chair", price: 299, quantity: 1 })
-        }
       />
     );
 
@@ -90,7 +102,7 @@ const App = () => {
     return (
       <CartScreen
         cartItems={cartItems}
-        onBack={() => setScreen("shopfur")}
+        onBack={() => setScreen("home")}
         onIncrement={incrementItem}
         onRemove={removeItem}
         total={totalPrice()}
@@ -99,21 +111,60 @@ const App = () => {
 
   if (screen === "ar") return <ARScene />;
 
-  if (screen === "chair")
+  if (screen === "furniture")
     return (
-      <ChairScreen goBack={() => setScreen("home")} goToScreen={setScreen} />
-    );
-  if (screen === "sofa")
-    return (
-      <SofaScreen goBack={() => setScreen("home")} goToScreen={setScreen} />
-    );
-  if (screen === "tvstand")
-    return (
-      <TVStandScreen goBack={() => setScreen("home")} goToScreen={setScreen} />
+      <FurnitureScreen
+        goBack={() => setScreen("home")}
+        goToScreen={setScreen}
+      />
     );
 
-  if (screen === "profile") return <HomeScreen goToScreen={setScreen} />; // placeholder for profile
-  if (screen === "inbox") return <HomeScreen goToScreen={setScreen} />; // placeholder for inbox
+  if (screen === "livingroom")
+    return (
+      <LivingRoomScreen
+        goBack={() => setScreen("furniture")}
+        goToScreen={setScreen}
+      />
+    );
+
+  if (screen === "broomt")
+    return (
+      <BRoomtScreen
+        goBack={() => setScreen("furniture")}
+        goToScreen={setScreen}
+      />
+    );
+
+  if (screen === "droomt")
+    return (
+      <DRoomtScreen
+        goBack={() => setScreen("furniture")}
+        goToScreen={setScreen}
+      />
+    );
+
+  if (["Desks", "Wardrobe", "Bed"].includes(screen))
+    return (
+      <BRoomScreen
+        category={screen as "Desks" | "Wardrobe" | "Bed"}
+        goToScreen={setScreen}
+        addToCart={(item) => addToCart({ ...item, quantity: 1 })}
+        onAR={() => setScreen("ar")}
+      />
+    );
+
+  if (["DiningChair", "Cabinet", "DiningTable"].includes(screen))
+    return (
+      <DRoomScreen
+        category={screen as "DiningChair" | "Cabinet" | "DiningTable"}
+        goToScreen={setScreen}
+        addToCart={(item) => addToCart({ ...item, quantity: 1 })}
+        onAR={() => setScreen("ar")}
+      />
+    );
+
+  if (screen === "profile") return <HomeScreen goToScreen={setScreen} />;
+  if (screen === "inbox") return <HomeScreen goToScreen={setScreen} />;
 
   return null;
 };

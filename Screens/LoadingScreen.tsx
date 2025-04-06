@@ -18,20 +18,37 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ onDone }) => {
     });
   }, [onDone]);
 
-  const progressInterpolation = progress.interpolate({
+  const BAR_WIDTH = 300;
+  const ICON_SIZE = 30;
+
+  // Cart icon travels across the bar
+  const iconTranslateX = progress.interpolate({
     inputRange: [0, 1],
-    outputRange: ["0%", "85%"],
+    outputRange: [0, BAR_WIDTH - ICON_SIZE],
+  });
+
+  // Bar width = icon's current X position
+  const barWidth = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, BAR_WIDTH - ICON_SIZE],
   });
 
   return (
     <View style={styles.container}>
-      <View style={styles.progressBarContainer}>
-        <Animated.View
-          style={[styles.progressBar, { width: progressInterpolation }]}
-        />
-        <Image
+      <View style={[styles.progressBarContainer, { width: BAR_WIDTH }]}>
+        {/* Progress bar that grows behind the cart */}
+        <Animated.View style={[styles.progressBar, { width: barWidth }]} />
+
+        {/* Cart icon that leads the progress */}
+        <Animated.Image
           source={require("../assets/cart_icon.png")}
-          style={styles.cartIcon}
+          style={[
+            styles.cartIcon,
+            {
+              transform: [{ translateX: iconTranslateX }],
+            },
+          ]}
+          resizeMode="contain"
         />
       </View>
     </View>
@@ -46,23 +63,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   progressBarContainer: {
-    width: "80%",
     height: 20,
     backgroundColor: "#F5E8D6",
     borderRadius: 10,
-    flexDirection: "row",
-    alignItems: "center",
     overflow: "hidden",
+    position: "relative",
   },
   progressBar: {
     height: "100%",
     backgroundColor: "#4D3B30",
+    position: "absolute",
+    left: 0,
+    top: 0,
   },
   cartIcon: {
     width: 30,
     height: 30,
     position: "absolute",
-    right: 5,
+    top: -5,
+    left: 0,
   },
 });
 

@@ -8,12 +8,12 @@ import {
   Animated,
   Dimensions,
 } from "react-native";
-import type { Screen } from "../types"; // ✅ path depends on your folder structure
+import type { Screen } from "../types"; // Adjust if needed
 
 interface HomeScreenProps {
   onEnterShop?: () => void;
   onCart?: () => void;
-  goToScreen?: (screen: Screen) => void; // ✅ FIXED TYPE
+  goToScreen?: (screen: Screen) => void;
 }
 
 const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -44,7 +44,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
   return (
     <View style={styles.container}>
-      {/* Drawer Menu */}
+      {/* Sidebar Drawer Menu */}
       {menuVisible && (
         <TouchableOpacity
           style={styles.backdrop}
@@ -52,47 +52,36 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           onPress={toggleMenu}
         >
           <Animated.View
-            style={[
-              styles.drawer,
-              {
-                transform: [{ translateX: slideAnim }],
-              },
-            ]}
+            style={[styles.drawer, { transform: [{ translateX: slideAnim }] }]}
           >
-            <Text style={styles.drawerTitle}>Living Room Furniture</Text>
-
-            <TouchableOpacity
-              style={styles.drawerItem}
-              onPress={() => {
-                goToScreen?.("chair");
-                toggleMenu();
-              }}
-            >
-              <Text style={styles.drawerIcon}>🪑</Text>
-              <Text style={styles.drawerLabel}>Chair</Text>
+            <TouchableOpacity style={styles.backButton} onPress={toggleMenu}>
+              <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.drawerItem}
-              onPress={() => {
-                goToScreen?.("sofa");
-                toggleMenu();
-              }}
+              style={styles.menuItem}
+              onPress={() => goToScreen?.("furniture")}
             >
-              <Text style={styles.drawerIcon}>🛋️</Text>
-              <Text style={styles.drawerLabel}>Sofa</Text>
+              <Text style={styles.menuText}>Furniture</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.drawerItem}
-              onPress={() => {
-                goToScreen?.("tvstand");
-                toggleMenu();
-              }}
-            >
-              <Text style={styles.drawerIcon}>📺</Text>
-              <Text style={styles.drawerLabel}>TV Stand</Text>
-            </TouchableOpacity>
+            <View style={styles.menuItem}>
+              <Text style={styles.menuText}>Home Office</Text>
+            </View>
+            <View style={styles.menuItem}>
+              <Text style={styles.menuText}>Home Decoration</Text>
+            </View>
+            <View style={styles.menuItem}>
+              <Text style={styles.menuText}>Help</Text>
+            </View>
+
+            <View style={styles.drawerBottomImage}>
+              <Image
+                source={require("../assets/cart_icon.png")}
+                style={styles.sfImage}
+                resizeMode="contain"
+              />
+            </View>
           </Animated.View>
         </TouchableOpacity>
       )}
@@ -112,14 +101,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
       {/* Main Content */}
       <View style={styles.mainContent}>
-        <View style={styles.tabsContainer}>
-          {["Study Room", "Bedroom", "Living Room", "Dining"].map((label) => (
-            <View style={styles.tab} key={label}>
-              <Text style={styles.tabText}>{label}</Text>
-            </View>
-          ))}
-        </View>
-
         <View style={styles.imageSlider}>
           <Image
             source={require("../assets/cart_icon.png")}
@@ -129,33 +110,49 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         </View>
 
         <Text style={styles.sectionTitle}>Shop by Category</Text>
+
+        {/* Separated Category Buttons */}
         <View style={styles.categoryGrid}>
-          {[
-            { label: "Living Room", icon: "🛋️" },
-            { label: "Dining", icon: "🍽️" },
-            { label: "Bedroom", icon: "🛏️" },
-            { label: "Comfort Room", icon: "🛁" },
-          ].map((item) => (
-            <TouchableOpacity
-              key={item.label}
-              style={styles.categoryButton}
-              onPress={onEnterShop}
-            >
-              <Text style={styles.categoryIcon}>{item.icon}</Text>
-              <Text style={styles.categoryLabel}>{item.label}</Text>
-            </TouchableOpacity>
-          ))}
+          <TouchableOpacity
+            style={styles.categoryButton}
+            onPress={() => goToScreen?.("livingroom")}
+          >
+            <Text style={styles.categoryIcon}>🛋️</Text>
+            <Text style={styles.categoryLabel}>Living Room</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.categoryButton}
+            onPress={() => goToScreen?.("droomt")}
+          >
+            <Text style={styles.categoryIcon}>🍽️</Text>
+            <Text style={styles.categoryLabel}>Dining</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.categoryButton}
+            onPress={() => goToScreen?.("broomt")}
+          >
+            <Text style={styles.categoryIcon}>🛏️</Text>
+            <Text style={styles.categoryLabel}>Bedroom</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => goToScreen?.("home")}
+        >
           <Text style={styles.navIcon}>👤</Text>
           <Text style={styles.navLabel}>Profile</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => goToScreen?.("home")}
+        >
           <Text style={styles.navIcon}>🏠</Text>
           <Text style={styles.navLabel}>Home</Text>
         </TouchableOpacity>
@@ -165,7 +162,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           <Text style={styles.navLabel}>Cart</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => goToScreen?.("home")}
+        >
           <Text style={styles.navIcon}>📥</Text>
           <Text style={styles.navLabel}>Inbox</Text>
         </TouchableOpacity>
@@ -176,6 +176,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
 export default HomeScreen;
 
+// STYLES (same as your current one, unchanged)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -277,29 +278,42 @@ const styles = StyleSheet.create({
     left: 0,
     width: "70%",
     height: "100%",
-    backgroundColor: "#3E2E22",
+    backgroundColor: "#D8C5B4",
     padding: 20,
     zIndex: 2,
+    justifyContent: "flex-start",
   },
-  drawerTitle: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
+  backButton: {
+    alignSelf: "flex-start",
+    backgroundColor: "#A89580",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
     marginBottom: 20,
   },
-  drawerItem: {
-    flexDirection: "row",
+  backButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+  menuItem: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#CBB8A6",
+    paddingVertical: 16,
+  },
+  menuText: {
+    fontSize: 16,
+    color: "#3E2E22",
+    fontWeight: "500",
+  },
+  drawerBottomImage: {
+    flex: 1,
+    justifyContent: "flex-end",
     alignItems: "center",
-    marginBottom: 16,
+    paddingTop: 40,
   },
-  drawerIcon: {
-    fontSize: 20,
-    marginRight: 12,
-    color: "white",
-  },
-  drawerLabel: {
-    fontSize: 18,
-    color: "white",
+  sfImage: {
+    width: 100,
+    height: 80,
   },
   backdrop: {
     position: "absolute",

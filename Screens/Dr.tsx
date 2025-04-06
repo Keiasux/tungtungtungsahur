@@ -16,34 +16,34 @@ interface Item {
 }
 
 interface ShopfurScreenProps {
-  category: "chair" | "sofa" | "tvstand";
+  category: "DiningChair" | "DiningTable" | "Cabinet";
   goToScreen: (screen: Screen) => void;
   addToCart: (item: { id: number; name: string; price: number }) => void;
   onAR: () => void;
 }
 
 const mockItems: Record<string, Item[]> = {
-  chair: [
+  DiningChair: [
     { id: 1, name: "Modern Chair", price: 1500 },
     { id: 2, name: "Office Chair", price: 1800 },
   ],
-  sofa: [
-    { id: 3, name: "Leather Sofa", price: 7500 },
-    { id: 4, name: "Sectional Sofa", price: 8999 },
+  DiningTable: [
+    { id: 3, name: "Leather Dining Table", price: 7500 },
+    { id: 4, name: "Sectional Dining Table", price: 8999 },
   ],
-  tvstand: [
-    { id: 5, name: "Classic TV Stand", price: 3200 },
-    { id: 6, name: "Wall-Mount Stand", price: 2800 },
+  Cabinet: [
+    { id: 5, name: "Classic Cabinet", price: 3200 },
+    { id: 6, name: "Modern Cabinet", price: 2800 },
   ],
 };
 
 const categoryTitles = {
-  chair: "Chair",
-  sofa: "Sofa",
-  tvstand: "TV Stand",
+  DiningChair: "DiningChair",
+  DiningTable: "DiningTable",
+  Cabinet: "Cabinet",
 };
 
-const ShopfurScreen: React.FC<ShopfurScreenProps> = ({
+const DRScreen: React.FC<ShopfurScreenProps> = ({
   category,
   goToScreen,
   addToCart,
@@ -180,7 +180,7 @@ const ShopfurScreen: React.FC<ShopfurScreenProps> = ({
   );
 };
 
-export default ShopfurScreen;
+export default DRScreen;
 
 const BottomNav = ({
   onNavigate,
