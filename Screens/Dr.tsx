@@ -13,41 +13,70 @@ interface Item {
   id: number;
   name: string;
   price: number;
+  glbUri: string;
 }
 
 interface ShopfurScreenProps {
-  category: "DiningChair" | "DiningTable" | "Cabinet";
-  goToScreen: (screen: Screen) => void;
+  category: "DiningChair" | "Cabinet" | "DiningTable";
+  goToScreen: (screen: Screen, params?: any) => void;
   addToCart: (item: { id: number; name: string; price: number }) => void;
-  onAR: () => void;
 }
 
 const mockItems: Record<string, Item[]> = {
   DiningChair: [
-    { id: 1, name: "Modern Chair", price: 1500 },
-    { id: 2, name: "Office Chair", price: 1800 },
-  ],
-  DiningTable: [
-    { id: 3, name: "Leather Dining Table", price: 7500 },
-    { id: 4, name: "Sectional Dining Table", price: 8999 },
+    {
+      id: 1,
+      name: "Modern Dining Chair",
+      price: 1500,
+      glbUri: "https://modelviewer.dev/shared-assets/models/Chair.glb",
+    },
+    {
+      id: 2,
+      name: "Old Dining Chair",
+      price: 1800,
+      glbUri: "https://modelviewer.dev/shared-assets/models/Chair.glb",
+    },
   ],
   Cabinet: [
-    { id: 5, name: "Classic Cabinet", price: 3200 },
-    { id: 6, name: "Modern Cabinet", price: 2800 },
+    {
+      id: 3,
+      name: "Leather Cabinet",
+      price: 7500,
+      glbUri: "https://modelviewer.dev/shared-assets/models/Sofa.glb",
+    },
+    {
+      id: 4,
+      name: "Sectional Cabinet",
+      price: 8999,
+      glbUri: "https://modelviewer.dev/shared-assets/models/Sofa.glb",
+    },
+  ],
+  DiningTable: [
+    {
+      id: 5,
+      name: "Classic Dining Table",
+      price: 3200,
+      glbUri: "https://modelviewer.dev/shared-assets/models/Shoe.glb",
+    },
+    {
+      id: 6,
+      name: "Vintage Dining Table",
+      price: 2800,
+      glbUri: "https://modelviewer.dev/shared-assets/models/Shoe.glb",
+    },
   ],
 };
 
 const categoryTitles = {
   DiningChair: "DiningChair",
-  DiningTable: "DiningTable",
   Cabinet: "Cabinet",
+  DiningTable: "DiningTable",
 };
 
 const DRScreen: React.FC<ShopfurScreenProps> = ({
   category,
   goToScreen,
   addToCart,
-  onAR,
 }) => {
   const [selectedItem, setSelectedItem] = React.useState<Item | null>(null);
   const [showFilters, setShowFilters] = React.useState(false);
@@ -97,7 +126,11 @@ const DRScreen: React.FC<ShopfurScreenProps> = ({
               >
                 <Text style={styles.cartButtonText}>Add to Cart</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.arButton} onPress={onAR}>
+
+              <TouchableOpacity
+                style={styles.arButton}
+                onPress={() => goToScreen("ar", { uri: selectedItem.glbUri })}
+              >
                 <Text style={styles.arButtonText}>AR VIEW</Text>
               </TouchableOpacity>
             </View>
@@ -185,7 +218,7 @@ export default DRScreen;
 const BottomNav = ({
   onNavigate,
 }: {
-  onNavigate: (screen: Screen) => void;
+  onNavigate: (screen: Screen, params?: any) => void;
 }) => {
   const navItems: { icon: string; label: string; target: Screen }[] = [
     { icon: "👤", label: "Profile", target: "cart" },

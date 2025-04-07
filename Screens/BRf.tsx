@@ -13,27 +13,57 @@ interface Item {
   id: number;
   name: string;
   price: number;
+  glbUri: string;
 }
 
 interface ShopfurScreenProps {
   category: "Desks" | "Wardrobe" | "Bed";
-  goToScreen: (screen: Screen) => void;
+  goToScreen: (screen: Screen, params?: any) => void;
   addToCart: (item: { id: number; name: string; price: number }) => void;
-  onAR: () => void;
 }
 
 const mockItems: Record<string, Item[]> = {
   Desks: [
-    { id: 1, name: "Modern Desk", price: 1500 },
-    { id: 2, name: "Office Desk", price: 1800 },
+    {
+      id: 1,
+      name: "Modern Desks",
+      price: 1500,
+      glbUri: "https://modelviewer.dev/shared-assets/models/Chair.glb",
+    },
+    {
+      id: 2,
+      name: "Office Desks",
+      price: 1800,
+      glbUri: "https://modelviewer.dev/shared-assets/models/Chair.glb",
+    },
   ],
   Wardrobe: [
-    { id: 3, name: "Leather Wardrobe", price: 7500 },
-    { id: 4, name: "Sectional Wardrobe", price: 8999 },
+    {
+      id: 3,
+      name: "Leather Wardrobe",
+      price: 7500,
+      glbUri: "https://modelviewer.dev/shared-assets/models/Sofa.glb",
+    },
+    {
+      id: 4,
+      name: "Sectional Wardrobe",
+      price: 8999,
+      glbUri: "https://modelviewer.dev/shared-assets/models/Sofa.glb",
+    },
   ],
   Bed: [
-    { id: 5, name: "Classic Bed", price: 3200 },
-    { id: 6, name: "Modern Bed", price: 2800 },
+    {
+      id: 5,
+      name: "Classic Bed",
+      price: 3200,
+      glbUri: "https://modelviewer.dev/shared-assets/models/Shoe.glb",
+    },
+    {
+      id: 6,
+      name: "Vintage Bed",
+      price: 2800,
+      glbUri: "https://modelviewer.dev/shared-assets/models/Shoe.glb",
+    },
   ],
 };
 
@@ -47,7 +77,6 @@ const BRScreen: React.FC<ShopfurScreenProps> = ({
   category,
   goToScreen,
   addToCart,
-  onAR,
 }) => {
   const [selectedItem, setSelectedItem] = React.useState<Item | null>(null);
   const [showFilters, setShowFilters] = React.useState(false);
@@ -97,7 +126,11 @@ const BRScreen: React.FC<ShopfurScreenProps> = ({
               >
                 <Text style={styles.cartButtonText}>Add to Cart</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.arButton} onPress={onAR}>
+
+              <TouchableOpacity
+                style={styles.arButton}
+                onPress={() => goToScreen("ar", { uri: selectedItem.glbUri })}
+              >
                 <Text style={styles.arButtonText}>AR VIEW</Text>
               </TouchableOpacity>
             </View>
@@ -185,7 +218,7 @@ export default BRScreen;
 const BottomNav = ({
   onNavigate,
 }: {
-  onNavigate: (screen: Screen) => void;
+  onNavigate: (screen: Screen, params?: any) => void;
 }) => {
   const navItems: { icon: string; label: string; target: Screen }[] = [
     { icon: "👤", label: "Profile", target: "cart" },

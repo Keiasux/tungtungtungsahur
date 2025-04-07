@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import LoadingScreen from "./LoadingScreen";
-import ARScene from "./ARScene";
 import CartScreen from "./CartScreen";
 import HomeScreen from "./Home";
 import FurnitureScreen from "./FurnitureScreen";
@@ -10,6 +9,9 @@ import DRoomScreen from "./Dr";
 import ShopfurScreen from "./FURARd";
 import BRoomtScreen from "./BRFt";
 import DRoomtScreen from "./Drt";
+import ARScene from "./ARScene";
+import DRScreen from "./Dr";
+import BRScreen from "./BRf";
 
 export type Screen =
   | "loading"
@@ -45,6 +47,7 @@ export interface CartItem {
 const App = () => {
   const [screen, setScreen] = useState<Screen>("loading");
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [arUri, setArUri] = useState<string>("");
 
   const addToCart = (newItem: CartItem) => {
     setCartItems((prev) => {
@@ -76,6 +79,13 @@ const App = () => {
   const totalPrice = () =>
     cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
+  const goToScreen = (target: Screen, params?: any) => {
+    if (target === "ar" && params?.uri) {
+      setArUri(params.uri);
+    }
+    setScreen(target);
+  };
+
   if (screen === "loading")
     return <LoadingScreen onDone={() => setScreen("home")} />;
 
@@ -84,7 +94,7 @@ const App = () => {
       <HomeScreen
         onCart={() => setScreen("cart")}
         onEnterShop={() => setScreen("shopfur")}
-        goToScreen={setScreen}
+        goToScreen={goToScreen}
       />
     );
 
@@ -92,9 +102,8 @@ const App = () => {
     return (
       <ShopfurScreen
         category={screen as "chair" | "sofa" | "tvstand"}
-        goToScreen={setScreen}
+        goToScreen={goToScreen}
         addToCart={(item) => addToCart({ ...item, quantity: 1 })}
-        onAR={() => setScreen("ar")}
       />
     );
 
@@ -109,13 +118,14 @@ const App = () => {
       />
     );
 
-  if (screen === "ar") return <ARScene />;
+  if (screen === "ar")
+    return <ARScene uri={arUri} goBack={() => setScreen("home")} />;
 
   if (screen === "furniture")
     return (
       <FurnitureScreen
         goBack={() => setScreen("home")}
-        goToScreen={setScreen}
+        goToScreen={goToScreen}
       />
     );
 
@@ -123,7 +133,7 @@ const App = () => {
     return (
       <LivingRoomScreen
         goBack={() => setScreen("furniture")}
-        goToScreen={setScreen}
+        goToScreen={goToScreen}
       />
     );
 
@@ -131,7 +141,7 @@ const App = () => {
     return (
       <BRoomtScreen
         goBack={() => setScreen("furniture")}
-        goToScreen={setScreen}
+        goToScreen={goToScreen}
       />
     );
 
@@ -139,32 +149,30 @@ const App = () => {
     return (
       <DRoomtScreen
         goBack={() => setScreen("furniture")}
-        goToScreen={setScreen}
+        goToScreen={goToScreen}
       />
     );
 
   if (["Desks", "Wardrobe", "Bed"].includes(screen))
     return (
-      <BRoomScreen
+      <BRScreen
         category={screen as "Desks" | "Wardrobe" | "Bed"}
-        goToScreen={setScreen}
+        goToScreen={goToScreen}
         addToCart={(item) => addToCart({ ...item, quantity: 1 })}
-        onAR={() => setScreen("ar")}
       />
     );
 
   if (["DiningChair", "Cabinet", "DiningTable"].includes(screen))
     return (
-      <DRoomScreen
+      <DRScreen
         category={screen as "DiningChair" | "Cabinet" | "DiningTable"}
-        goToScreen={setScreen}
+        goToScreen={goToScreen}
         addToCart={(item) => addToCart({ ...item, quantity: 1 })}
-        onAR={() => setScreen("ar")}
       />
     );
 
-  if (screen === "profile") return <HomeScreen goToScreen={setScreen} />;
-  if (screen === "inbox") return <HomeScreen goToScreen={setScreen} />;
+  if (screen === "profile") return <HomeScreen goToScreen={goToScreen} />;
+  if (screen === "inbox") return <HomeScreen goToScreen={goToScreen} />;
 
   return null;
 };

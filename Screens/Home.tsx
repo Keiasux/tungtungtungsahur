@@ -145,16 +145,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           style={styles.navItem}
           onPress={() => goToScreen?.("home")}
         >
-          <Text style={styles.navIcon}>👤</Text>
-          <Text style={styles.navLabel}>Profile</Text>
+          <Text style={styles.navIcon}>🏠</Text>
+          <Text style={styles.navLabel}>Home</Text>
         </TouchableOpacity>
-
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => goToScreen?.("home")}
         >
-          <Text style={styles.navIcon}>🏠</Text>
-          <Text style={styles.navLabel}>Home</Text>
+          <Text style={styles.navIcon}>📥</Text>
+          <Text style={styles.navLabel}>Inbox</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.navItem} onPress={onCart}>
@@ -166,8 +165,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           style={styles.navItem}
           onPress={() => goToScreen?.("home")}
         >
-          <Text style={styles.navIcon}>📥</Text>
-          <Text style={styles.navLabel}>Inbox</Text>
+          <Text style={styles.navIcon}>👤</Text>
+          <Text style={styles.navLabel}>Profile</Text>
         </TouchableOpacity>
       </View>
     </View>
