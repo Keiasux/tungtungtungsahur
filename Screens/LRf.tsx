@@ -33,14 +33,14 @@ const LivingRoomScreen: React.FC<LivingRoomScreenProps> = ({
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={styles.optionButton}
-            onPress={() => goToScreen("chair")}
+            onPress={() => goToScreen("Chair")}
           >
             <Text style={styles.optionText}>Chair</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.optionButton}
-            onPress={() => goToScreen("sofa")}
+            onPress={() => goToScreen("Sofa")}
           >
             <Text style={styles.optionText}>Sofa</Text>
           </TouchableOpacity>
@@ -49,7 +49,7 @@ const LivingRoomScreen: React.FC<LivingRoomScreenProps> = ({
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={styles.optionButton}
-            onPress={() => goToScreen("tvstand")}
+            onPress={() => goToScreen("TVStand")}
           >
             <Text style={styles.optionText}>TV Stand</Text>
           </TouchableOpacity>

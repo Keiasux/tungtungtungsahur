@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,65 +7,24 @@ import {
   Image,
   FlatList,
 } from "react-native";
+import { firestore } from "../firebase/firebaseConfig";  // Import firestore from firebaseConfig
+import { collection, getDocs, query, where } from 'firebase/firestore';  // Firebase Firestore methods
 import type { Screen } from "../types";
 
 interface Item {
-  id: number;
+  id: string; // Firestore autoID will be a string
   name: string;
   price: number;
+  category: string;
   glbUri: string;
+  image: string;
 }
 
 interface ShopfurScreenProps {
   category: "DiningChair" | "Cabinet" | "DiningTable";
   goToScreen: (screen: Screen, params?: any) => void;
-  addToCart: (item: { id: number; name: string; price: number }) => void;
+  addToCart: (item: { id: string; name: string; price: number }) => void;
 }
-
-const mockItems: Record<string, Item[]> = {
-  DiningChair: [
-    {
-      id: 1,
-      name: "Modern Dining Chair",
-      price: 1500,
-      glbUri: "https://modelviewer.dev/shared-assets/models/Chair.glb",
-    },
-    {
-      id: 2,
-      name: "Old Dining Chair",
-      price: 1800,
-      glbUri: "https://modelviewer.dev/shared-assets/models/Chair.glb",
-    },
-  ],
-  Cabinet: [
-    {
-      id: 3,
-      name: "Leather Cabinet",
-      price: 7500,
-      glbUri: "https://modelviewer.dev/shared-assets/models/Sofa.glb",
-    },
-    {
-      id: 4,
-      name: "Sectional Cabinet",
-      price: 8999,
-      glbUri: "https://modelviewer.dev/shared-assets/models/Sofa.glb",
-    },
-  ],
-  DiningTable: [
-    {
-      id: 5,
-      name: "Classic Dining Table",
-      price: 3200,
-      glbUri: "https://modelviewer.dev/shared-assets/models/Shoe.glb",
-    },
-    {
-      id: 6,
-      name: "Vintage Dining Table",
-      price: 2800,
-      glbUri: "https://modelviewer.dev/shared-assets/models/Shoe.glb",
-    },
-  ],
-};
 
 const categoryTitles = {
   DiningChair: "DiningChair",
@@ -78,13 +37,42 @@ const DRScreen: React.FC<ShopfurScreenProps> = ({
   goToScreen,
   addToCart,
 }) => {
-  const [selectedItem, setSelectedItem] = React.useState<Item | null>(null);
-  const [showFilters, setShowFilters] = React.useState(false);
-  const [sortOrder, setSortOrder] = React.useState<"asc" | "desc" | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
+  const [items, setItems] = useState<Item[]>([]); // State to hold items
 
   const toggleFilters = () => setShowFilters(!showFilters);
 
-  let items = [...mockItems[category]];
+  // Fetch data from Firestore
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        // Create a reference to the collection
+        const productsCollection = collection(firestore, "dining_products");
+
+        // Create a query to filter items by category
+        const productsQuery = query(productsCollection, where("category", "==", category));
+
+        // Get documents
+        const snapshot = await getDocs(productsQuery);
+        
+        // Map Firestore documents to your items array
+        const fetchedItems: Item[] = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Item[];
+
+        setItems(fetchedItems); // Update state with fetched items
+      } catch (error) {
+        console.error("Error fetching products from Firebase:", error);
+      }
+    };
+
+    fetchItems();
+  }, [category]); // Fetch data whenever category changes
+
+  // Sort items based on selected sort order
   if (sortOrder === "asc") items.sort((a, b) => a.price - b.price);
   else if (sortOrder === "desc") items.sort((a, b) => b.price - a.price);
 
@@ -105,12 +93,12 @@ const DRScreen: React.FC<ShopfurScreenProps> = ({
 
         <View style={styles.detailsContainer}>
           <Text style={styles.sectionTitle}>
-            Living Room | {categoryTitles[category]}
+            Dining Room | {categoryTitles[category]}
           </Text>
 
           <View style={styles.itemDetailCard}>
             <Image
-              source={require("../assets/cart_icon.png")}
+              source={{ uri: selectedItem.image }}
               style={{ width: 50, height: 50 }}
             />
             <Text style={styles.itemName}>{selectedItem.name}</Text>
@@ -158,7 +146,7 @@ const DRScreen: React.FC<ShopfurScreenProps> = ({
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>
-          Living Room | {categoryTitles[category]}
+          Dining Room | {categoryTitles[category]}
         </Text>
 
         <View style={styles.filterRow}>
@@ -193,7 +181,7 @@ const DRScreen: React.FC<ShopfurScreenProps> = ({
 
       <FlatList
         data={items}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
         numColumns={2}
         contentContainerStyle={styles.grid}
         renderItem={({ item }) => (
@@ -201,7 +189,10 @@ const DRScreen: React.FC<ShopfurScreenProps> = ({
             style={styles.itemBox}
             onPress={() => setSelectedItem(item)}
           >
-            <View style={styles.itemImagePlaceholder} />
+            <Image
+              source={{ uri: item.image }}
+              style={styles.itemImagePlaceholder}
+            />
             <Text style={styles.itemName}>{item.name}</Text>
             <Text style={styles.itemPrice}>₱ {item.price}</Text>
           </TouchableOpacity>

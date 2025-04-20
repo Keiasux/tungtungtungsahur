@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,85 +7,67 @@ import {
   Image,
   FlatList,
 } from "react-native";
+import { firestore } from "../firebase/firebaseConfig";  // Import firestore from firebaseConfig
+import { collection, getDocs, query, where } from 'firebase/firestore';  // Firebase Firestore methods
 import type { Screen } from "../types";
 
 interface Item {
-  id: number;
+  id: string;
   name: string;
   price: number;
+  category: string;
   glbUri: string;
+  image: string;
 }
 
-interface ShopfurScreenProps {
-  category: "chair" | "sofa" | "tvstand";
+interface LivingRoomScreenProps {
+  category: "Chair" | "Sofa" | "TVStand";
   goToScreen: (screen: Screen, params?: any) => void;
-  addToCart: (item: { id: number; name: string; price: number }) => void;
+  addToCart: (item: { id: string; name: string; price: number }) => void;
 }
-
-const mockItems: Record<string, Item[]> = {
-  chair: [
-    {
-      id: 1,
-      name: "Modern Chair",
-      price: 1500,
-      glbUri: "https://modelviewer.dev/shared-assets/models/Chair.glb",
-    },
-    {
-      id: 2,
-      name: "Office Chair",
-      price: 1800,
-      glbUri: "https://modelviewer.dev/shared-assets/models/Chair.glb",
-    },
-  ],
-  sofa: [
-    {
-      id: 3,
-      name: "Leather Sofa",
-      price: 7500,
-      glbUri:
-        "https://raw.githubusercontent.com/Jerohm-1003/glb-models/main/furniture.glb",
-    },
-    {
-      id: 4,
-      name: "Sectional Sofa",
-      price: 8999,
-      glbUri: "https://modelviewer.dev/shared-assets/models/Sofa.glb",
-    },
-  ],
-  tvstand: [
-    {
-      id: 5,
-      name: "Classic TV Stand",
-      price: 3200,
-      glbUri: "https://modelviewer.dev/shared-assets/models/Shoe.glb",
-    },
-    {
-      id: 6,
-      name: "Wall-Mount Stand",
-      price: 2800,
-      glbUri: "https://modelviewer.dev/shared-assets/models/Shoe.glb",
-    },
-  ],
-};
 
 const categoryTitles = {
-  chair: "Chair",
-  sofa: "Sofa",
-  tvstand: "TV Stand",
+  Chair: "Chair",
+  Sofa: "Sofa",
+  TVStand: "TV Stand",
 };
 
-const ShopfurScreen: React.FC<ShopfurScreenProps> = ({
+const LivingRoomScreen: React.FC<LivingRoomScreenProps> = ({
   category,
   goToScreen,
   addToCart,
 }) => {
-  const [selectedItem, setSelectedItem] = React.useState<Item | null>(null);
-  const [showFilters, setShowFilters] = React.useState(false);
-  const [sortOrder, setSortOrder] = React.useState<"asc" | "desc" | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
+  const [items, setItems] = useState<Item[]>([]);
 
   const toggleFilters = () => setShowFilters(!showFilters);
 
-  let items = [...mockItems[category]];
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const productsCollection = collection(firestore, "livingroom_products");
+        const productsQuery = query(
+          productsCollection,
+          where("category", "==", category)
+        );
+        const snapshot = await getDocs(productsQuery);
+
+        const fetchedItems: Item[] = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Item[];
+
+        setItems(fetchedItems);
+      } catch (error) {
+        console.error("Error fetching products from Firebase:", error);
+      }
+    };
+
+    fetchItems();
+  }, [category]);
+
   if (sortOrder === "asc") items.sort((a, b) => a.price - b.price);
   else if (sortOrder === "desc") items.sort((a, b) => b.price - a.price);
 
@@ -111,7 +93,7 @@ const ShopfurScreen: React.FC<ShopfurScreenProps> = ({
 
           <View style={styles.itemDetailCard}>
             <Image
-              source={require("../assets/cart_icon.png")}
+              source={{ uri: selectedItem.image }}
               style={{ width: 50, height: 50 }}
             />
             <Text style={styles.itemName}>{selectedItem.name}</Text>
@@ -130,7 +112,9 @@ const ShopfurScreen: React.FC<ShopfurScreenProps> = ({
 
               <TouchableOpacity
                 style={styles.arButton}
-                onPress={() => goToScreen("ar", { uri: selectedItem.glbUri })}
+                onPress={() =>
+                  goToScreen("ar", { uri: selectedItem.glbUri })
+                }
               >
                 <Text style={styles.arButtonText}>AR VIEW</Text>
               </TouchableOpacity>
@@ -194,7 +178,7 @@ const ShopfurScreen: React.FC<ShopfurScreenProps> = ({
 
       <FlatList
         data={items}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
         numColumns={2}
         contentContainerStyle={styles.grid}
         renderItem={({ item }) => (
@@ -202,7 +186,10 @@ const ShopfurScreen: React.FC<ShopfurScreenProps> = ({
             style={styles.itemBox}
             onPress={() => setSelectedItem(item)}
           >
-            <View style={styles.itemImagePlaceholder} />
+            <Image
+              source={{ uri: item.image }}
+              style={styles.itemImagePlaceholder}
+            />
             <Text style={styles.itemName}>{item.name}</Text>
             <Text style={styles.itemPrice}>₱ {item.price}</Text>
           </TouchableOpacity>
@@ -214,7 +201,7 @@ const ShopfurScreen: React.FC<ShopfurScreenProps> = ({
   );
 };
 
-export default ShopfurScreen;
+export default LivingRoomScreen;
 
 const BottomNav = ({
   onNavigate,

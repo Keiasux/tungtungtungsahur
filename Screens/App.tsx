@@ -19,9 +19,9 @@ export type Screen =
   | "shopfur"
   | "ar"
   | "cart"
-  | "chair"
-  | "sofa"
-  | "tvstand"
+  | "Chair"
+  | "Sofa"
+  | "TVStand"
   | "profile"
   | "inbox"
   | "furniture"
@@ -98,10 +98,10 @@ const App = () => {
       />
     );
 
-  if (["chair", "sofa", "tvstand"].includes(screen))
+  if (["Chair", "Sofa", "TVStand"].includes(screen))
     return (
       <ShopfurScreen
-        category={screen as "chair" | "sofa" | "tvstand"}
+        category={screen as "Chair" | "Sofa" | "TVStand"}
         goToScreen={goToScreen}
         addToCart={(item) => addToCart({ ...item, quantity: 1 })}
       />
