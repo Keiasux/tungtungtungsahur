@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ interface HomeScreenProps {
   goToScreen?: (screen: Screen) => void;
 }
 
+
 const HomeScreen: React.FC<HomeScreenProps> = ({
   onEnterShop,
   onCart,
@@ -24,6 +25,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const screenWidth = Dimensions.get("window").width;
   const [menuVisible, setMenuVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-screenWidth)).current;
+
 
   const toggleMenu = () => {
     if (menuVisible) {
@@ -55,7 +57,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             style={[styles.drawer, { transform: [{ translateX: slideAnim }] }]}
           >
             <TouchableOpacity style={styles.backButton} onPress={toggleMenu}>
-              <Text style={styles.backButtonText}>Back</Text>
+              <Text style={styles.backButtonText}>←</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -163,7 +165,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => goToScreen?.("home")}
+          onPress={() => goToScreen?.("profile")}
         >
           <Text style={styles.navIcon}>👤</Text>
           <Text style={styles.navLabel}>Profile</Text>

@@ -1,5 +1,14 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+
+import React, { useState, useRef, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Animated,
+  Dimensions,
+} from "react-native";
 import type { Screen } from "../types";
 
 interface LivingRoomScreenProps {
@@ -11,22 +20,85 @@ const DRoomtScreen: React.FC<LivingRoomScreenProps> = ({
   goToScreen,
   goBack,
 }) => {
+     const screenWidth = Dimensions.get("window").width;
+      const [menuVisible, setMenuVisible] = useState(false);
+      const slideAnim = useRef(new Animated.Value(-screenWidth)).current;
+      const toggleMenu = () => {
+        if (menuVisible) {
+          Animated.timing(slideAnim, {
+            toValue: -screenWidth,
+            duration: 300,
+            useNativeDriver: true,
+          }).start(() => setMenuVisible(false));
+        } else {
+          setMenuVisible(true);
+          Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }).start();
+        }
+      };
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.logoContainer}>
-          <Image
-            source={require("../assets/cart_icon.png")}
-            style={styles.logo}
-          />
-          <Text style={styles.logoText}>SHOPFUR</Text>
-        </View>
-        <Text style={styles.headerIcon}>⚙️</Text>
-      </View>
+             {/* Sidebar Drawer Menu */}
+             {menuVisible && (
+               <TouchableOpacity
+                 style={styles.backdrop}
+                 activeOpacity={1}
+                 onPress={toggleMenu}
+               >
+                 <Animated.View
+                   style={[styles.drawer, { transform: [{ translateX: slideAnim }] }]}
+                 >
+                   <TouchableOpacity style={styles.backButton} onPress={toggleMenu}>
+                     <Text style={styles.backButtonText}>←</Text>
+                   </TouchableOpacity>
+       
+                   <TouchableOpacity
+                     style={styles.menuItem}
+                     onPress={() => goToScreen?.("furniture")}
+                   >
+                     <Text style={styles.menuText}>Furniture</Text>
+                   </TouchableOpacity>
+       
+                   <View style={styles.menuItem}>
+                     <Text style={styles.menuText}>Home Office</Text>
+                   </View>
+                   <View style={styles.menuItem}>
+                     <Text style={styles.menuText}>Home Decoration</Text>
+                   </View>
+                   <View style={styles.menuItem}>
+                     <Text style={styles.menuText}>Help</Text>
+                   </View>
+       
+                   <View style={styles.drawerBottomImage}>
+                     <Image
+                       source={require("../assets/cart_icon.png")}
+                       style={styles.sfImage}
+                       resizeMode="contain"
+                     />
+                   </View>
+                 </Animated.View>
+               </TouchableOpacity>
+             )}
+ 
+           {/* Header */}
+           <View style={styles.header}>
+             <TouchableOpacity onPress={toggleMenu}>
+               <Text style={styles.headerIcon}>☰</Text>
+             </TouchableOpacity>
+             <Image
+               source={require("../assets/cart_icon.png")}
+               style={styles.logoImage}
+               resizeMode="contain"
+             />
+             <Text style={styles.headerIcon}>⚙️</Text>
+           </View>
 
       <View style={styles.content}>
-        <TouchableOpacity style={styles.backButton} onPress={goBack}>
-          <Text style={styles.backButtonText}>Back</Text>
+        <TouchableOpacity style={styles.backButton} onPress={() => goToScreen("home")}>
+          <Text style={styles.backButtonText}>←</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Dining Room Furniture</Text>
 
@@ -35,14 +107,14 @@ const DRoomtScreen: React.FC<LivingRoomScreenProps> = ({
             style={styles.optionButton}
             onPress={() => goToScreen("DiningChair")}
           >
-            <Text style={styles.optionText}>Dining Chair</Text>
+            <Text style={styles.optionText}>🪑 Dining Chair</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.optionButton}
             onPress={() => goToScreen("Cabinet")}
           >
-            <Text style={styles.optionText}>Cabinet</Text>
+            <Text style={styles.optionText}>🗄️ Cabinet</Text>
           </TouchableOpacity>
         </View>
 
@@ -51,23 +123,23 @@ const DRoomtScreen: React.FC<LivingRoomScreenProps> = ({
             style={styles.optionButton}
             onPress={() => goToScreen("DiningTable")}
           >
-            <Text style={styles.optionText}>Dining Table</Text>
+            <Text style={styles.optionText}>🍽️ Dining Table</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       <View style={styles.bottomNav}>
-        {["profile", "home", "cart", "inbox"].map((target, index) => (
+        {["home", "inbox", "cart", "profile"].map((target, index) => (
           <TouchableOpacity
             key={index}
             style={styles.navItem}
             onPress={() => goToScreen(target as Screen)}
           >
             <Text style={styles.navIcon}>
-              {["👤", "🏠", "🛒", "📥"][index]}
+              {["🏠", "📥", "🛒", "👤"][index]}
             </Text>
             <Text style={styles.navLabel}>
-              {["Profile", "Home", "Cart", "Inbox"][index]}
+              {["Home", "Inbox", "Cart", "Profile"][index]}
             </Text>
           </TouchableOpacity>
         ))}
@@ -85,9 +157,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
-  headerIcon: { color: "white", fontSize: 22 },
+  headerIcon: {
+    color: "white",
+    fontSize: 24,
+  },
   logoContainer: { flexDirection: "row", alignItems: "center" },
   logo: { width: 30, height: 30, marginRight: 6 },
   logoText: { color: "white", fontWeight: "bold", fontSize: 16 },
@@ -130,5 +206,49 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 8,
     marginBottom: 20,
+  },
+  menuItem: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#CBB8A6",
+    paddingVertical: 16,
+  },
+  menuText: {
+    fontSize: 16,
+    color: "#3E2E22",
+    fontWeight: "500",
+  },
+  drawerBottomImage: {
+    flex: 1,
+    justifyContent: "flex-end",
+    alignItems: "center",
+    paddingTop: 40,
+  },
+  sfImage: {
+    width: 100,
+    height: 80,
+  },
+  logoImage: {
+    width: 100,
+    height: 40,
+  },
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    zIndex: 1,
+  },
+  drawer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "70%",
+    height: "100%",
+    backgroundColor: "#D8C5B4",
+    padding: 20,
+    zIndex: 2,
+    justifyContent: "flex-start",
   },
 });

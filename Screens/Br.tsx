@@ -1,3 +1,4 @@
+//X
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import type { Screen } from "../types";
@@ -30,14 +31,14 @@ const BRoomScreen: React.FC<BRoomScreenProps> = ({ goToScreen, goBack }) => {
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={styles.optionButton}
-            onPress={() => goToScreen("chair")}
+            onPress={() => goToScreen("Desks")}
           >
             <Text style={styles.optionText}>Desks & Chairs</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.optionButton}
-            onPress={() => goToScreen("sofa")}
+            onPress={() => goToScreen("Wardrobe")}
           >
             <Text style={styles.optionText}>Wardrobe</Text>
           </TouchableOpacity>
@@ -46,7 +47,7 @@ const BRoomScreen: React.FC<BRoomScreenProps> = ({ goToScreen, goBack }) => {
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={styles.optionButton}
-            onPress={() => goToScreen("tvstand")}
+            onPress={() => goToScreen("Bed")}
           >
             <Text style={styles.optionText}>Bed</Text>
           </TouchableOpacity>
@@ -54,17 +55,17 @@ const BRoomScreen: React.FC<BRoomScreenProps> = ({ goToScreen, goBack }) => {
       </View>
 
       <View style={styles.bottomNav}>
-        {["profile", "home", "cart", "inbox"].map((target, index) => (
+        {["home", "inbox", "cart", "profile"].map((target, index) => (
           <TouchableOpacity
             key={index}
             style={styles.navItem}
             onPress={() => goToScreen(target as Screen)}
           >
             <Text style={styles.navIcon}>
-              {["👤", "🏠", "🛒", "📥"][index]}
+              {["🏠", "📥", "🛒", "👤"][index]}
             </Text>
             <Text style={styles.navLabel}>
-              {["Profile", "Home", "Cart", "Inbox"][index]}
+              {["Home", "Inbox", "Cart", "Profile"][index]}
             </Text>
           </TouchableOpacity>
         ))}

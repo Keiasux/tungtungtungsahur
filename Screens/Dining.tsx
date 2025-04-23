@@ -1,3 +1,4 @@
+// X
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import type { Screen } from "../types";
@@ -30,14 +31,14 @@ const DRoomScreen: React.FC<DRoomScreenProps> = ({ goToScreen, goBack }) => {
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={styles.optionButton}
-            onPress={() => goToScreen("chair")}
+            onPress={() => goToScreen("DiningChair")}
           >
             <Text style={styles.optionText}>Dining Chair</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.optionButton}
-            onPress={() => goToScreen("sofa")}
+            onPress={() => goToScreen("DiningTable")}
           >
             <Text style={styles.optionText}>Dining Table</Text>
           </TouchableOpacity>
@@ -46,7 +47,7 @@ const DRoomScreen: React.FC<DRoomScreenProps> = ({ goToScreen, goBack }) => {
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={styles.optionButton}
-            onPress={() => goToScreen("tvstand")}
+            onPress={() => goToScreen("Cabinet")}
           >
             <Text style={styles.optionText}>Cabinet</Text>
           </TouchableOpacity>
@@ -54,17 +55,17 @@ const DRoomScreen: React.FC<DRoomScreenProps> = ({ goToScreen, goBack }) => {
       </View>
 
       <View style={styles.bottomNav}>
-        {["profile", "home", "cart", "inbox"].map((target, index) => (
+        {["home", "inbox", "cart", "profile"].map((target, index) => (
           <TouchableOpacity
             key={index}
             style={styles.navItem}
             onPress={() => goToScreen(target as Screen)}
           >
             <Text style={styles.navIcon}>
-              {["👤", "🏠", "🛒", "📥"][index]}
+              {["🏠", "📥", "🛒", "👤"][index]}
             </Text>
             <Text style={styles.navLabel}>
-              {["Profile", "Home", "Cart", "Inbox"][index]}
+              {["Home", "Inbox", "Cart", "Profile"][index]}
             </Text>
           </TouchableOpacity>
         ))}

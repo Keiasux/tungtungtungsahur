@@ -13,8 +13,8 @@ const FurnitureScreen: React.FC<FurnitureScreenProps> = ({
 }) => {
   const screenMap: { [label: string]: Screen } = {
     "Living Room": "livingroom",
-    "Bed room": "bedroom",
-    "Dining room": "diningroom",
+    "Bed room": "broomt",
+    "Dining room": "droomt",
   };
 
   return (
@@ -25,14 +25,14 @@ const FurnitureScreen: React.FC<FurnitureScreenProps> = ({
             source={require("../assets/cart_icon.png")}
             style={styles.logoImage}
           />
-          <Text style={styles.logoText}>SHOPFUR</Text>
+          <Text style={styles.logoText}></Text>
         </View>
         <Text style={styles.headerIcon}>⚙️</Text>
       </View>
 
       <View style={styles.content}>
         <TouchableOpacity style={styles.backButton} onPress={goBack}>
-          <Text style={styles.backButtonText}>Back</Text>
+          <Text style={styles.backButtonText}>←</Text>
         </TouchableOpacity>
 
         <Text style={styles.title}>Furniture</Text>
@@ -49,17 +49,17 @@ const FurnitureScreen: React.FC<FurnitureScreenProps> = ({
       </View>
 
       <View style={styles.bottomNav}>
-        {["profile", "home", "cart", "inbox"].map((target, index) => (
+        {["home", "inbox", "cart", "profile"].map((target, index) => (
           <TouchableOpacity
             key={index}
             style={styles.navItem}
             onPress={() => goToScreen(target as Screen)}
           >
             <Text style={styles.navIcon}>
-              {["👤", "🏠", "🛒", "📥"][index]}
+              {["🏠", "📥", "🛒", "👤"][index]}
             </Text>
             <Text style={styles.navLabel}>
-              {["Profile", "Home", "Cart", "Inbox"][index]}
+              {["Home", "Inbox", "Cart", "Profile"][index]}
             </Text>
           </TouchableOpacity>
         ))}

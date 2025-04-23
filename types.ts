@@ -4,9 +4,9 @@ export type Screen =
   | "shopfur"
   | "ar"
   | "cart"
-  | "chair"
-  | "sofa"
-  | "tvstand"
+  | "Chair"
+  | "Sofa"
+  | "TVStand"
   | "furniture"
   | "livingroom"
   | "bedroom"
@@ -19,4 +19,8 @@ export type Screen =
   | "DiningChair"
   | "broomt"
   | "droomt"
+  | "lreg"
+  | "profile"
+  | "profileSetup"
+  
 

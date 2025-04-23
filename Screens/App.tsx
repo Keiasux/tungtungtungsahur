@@ -12,6 +12,12 @@ import DRoomtScreen from "./Drt";
 import ARScene from "./ARScene";
 import DRScreen from "./Dr";
 import BRScreen from "./BRf";
+import LRegScreen from "./lreg";
+import Profile from "./Profile";
+import NewlyUinfo from "./newlyUinfo";
+import ProfileSetupScreen from "./ProfileSetupScreen";
+import "../firebase/firebaseConfig";
+
 
 export type Screen =
   | "loading"
@@ -35,7 +41,10 @@ export type Screen =
   | "Cabinet"
   | "DiningChair"
   | "broomt"
-  | "droomt";
+  | "droomt"
+  | "lreg"
+  | "intro"
+  | "profileSetup";
 
 export interface CartItem {
   id: number;
@@ -48,6 +57,9 @@ const App = () => {
   const [screen, setScreen] = useState<Screen>("loading");
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [arUri, setArUri] = useState<string>("");
+  const [showIntro, setShowIntro] = useState(true);
+  const [screenParams, setScreenParams] = useState<any>(null);
+
 
   const addToCart = (newItem: CartItem) => {
     setCartItems((prev) => {
@@ -83,11 +95,32 @@ const App = () => {
     if (target === "ar" && params?.uri) {
       setArUri(params.uri);
     }
+    setScreenParams(params ?? null); // 👈 save passed params
     setScreen(target);
   };
 
   if (screen === "loading")
-    return <LoadingScreen onDone={() => setScreen("home")} />;
+    return (
+      <LoadingScreen
+        onDone={() => {
+          setScreen("intro");
+        }}
+      />
+    );
+
+  if (screen === "intro")
+    return <NewlyUinfo onFinish={() => setScreen("home")} />;
+  
+  if (screen === "lreg") return <LRegScreen goToScreen={goToScreen} />;
+
+  if (screen === "profileSetup" && screenParams)
+    return (
+      <ProfileSetupScreen
+        goToScreen={goToScreen}
+        route={{ params: screenParams }}
+      />
+    );
+  
 
   if (screen === "home")
     return (
@@ -171,7 +204,11 @@ const App = () => {
       />
     );
 
-  if (screen === "profile") return <HomeScreen goToScreen={goToScreen} />;
+  if (screen === "profile")
+    return (
+      <Profile goToScreen={goToScreen} goBack={() => setScreen("home")} />
+    );
+
   if (screen === "inbox") return <HomeScreen goToScreen={goToScreen} />;
 
   return null;
