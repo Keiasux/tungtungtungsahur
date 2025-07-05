@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
   Dimensions,
 } from "react-native";
 import { firestore } from "../firebase/firebaseConfig";
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import type { Screen } from "../types";
 
@@ -51,22 +51,23 @@ const LivingRoomScreen: React.FC<LivingRoomScreenProps> = ({
   const screenWidth = Dimensions.get("window").width;
   const [menuVisible, setMenuVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-screenWidth)).current;
+
   const toggleMenu = () => {
-        if (menuVisible) {
-          Animated.timing(slideAnim, {
-            toValue: -screenWidth,
-            duration: 300,
-            useNativeDriver: true,
-          }).start(() => setMenuVisible(false));
-        } else {
-          setMenuVisible(true);
-          Animated.timing(slideAnim, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }).start();
-        }
-      };
+    if (menuVisible) {
+      Animated.timing(slideAnim, {
+        toValue: -screenWidth,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => setMenuVisible(false));
+    } else {
+      setMenuVisible(true);
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  };
 
   const toggleFilters = () => setShowFilters(!showFilters);
 
@@ -74,9 +75,15 @@ const LivingRoomScreen: React.FC<LivingRoomScreenProps> = ({
     const fetchItems = async () => {
       try {
         const productsCollection = collection(firestore, "livingroom_products");
-        const productsQuery = query(productsCollection, where("category", "==", category));
-        const snapshot = await getDocs(productsQuery);
 
+        // ✅ Only fetch "approved" items for the category
+        const productsQuery = query(
+          productsCollection,
+          where("category", "==", category),
+          where("status", "==", "approved") // ✅ Filter
+        );
+
+        const snapshot = await getDocs(productsQuery);
         const fetchedItems: Item[] = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -109,66 +116,65 @@ const LivingRoomScreen: React.FC<LivingRoomScreenProps> = ({
     }
   };
 
-
   if (sortOrder === "asc") items.sort((a, b) => a.price - b.price);
   else if (sortOrder === "desc") items.sort((a, b) => b.price - a.price);
 
   return (
-     <View style={styles.container}>
-             {/* Sidebar Drawer Menu */}
-             {menuVisible && (
-               <TouchableOpacity
-                 style={styles.backdrop}
-                 activeOpacity={1}
-                 onPress={toggleMenu}
-               >
-                 <Animated.View
-                   style={[styles.drawer, { transform: [{ translateX: slideAnim }] }]}
-                 >
-                   <TouchableOpacity style={styles.backButton} onPress={toggleMenu}>
-                     <Text style={styles.backButtonText}>←</Text>
-                   </TouchableOpacity>
-       
-                   <TouchableOpacity
-                     style={styles.menuItem}
-                     onPress={() => goToScreen?.("furniture")}
-                   >
-                     <Text style={styles.menuText}>Furniture</Text>
-                   </TouchableOpacity>
-       
-                   <View style={styles.menuItem}>
-                     <Text style={styles.menuText}>Home Office</Text>
-                   </View>
-                   <View style={styles.menuItem}>
-                     <Text style={styles.menuText}>Home Decoration</Text>
-                   </View>
-                   <View style={styles.menuItem}>
-                     <Text style={styles.menuText}>Help</Text>
-                   </View>
-       
-                   <View style={styles.drawerBottomImage}>
-                     <Image
-                       source={require("../assets/cart_icon.png")}
-                       style={styles.sfImage}
-                       resizeMode="contain"
-                     />
-                   </View>
-                 </Animated.View>
-               </TouchableOpacity>
-             )}
- 
-           {/* Header */}
-           <View style={styles.header}>
-             <TouchableOpacity onPress={toggleMenu}>
-               <Text style={styles.headerIcon}>☰</Text>
-             </TouchableOpacity>
-             <Image
-               source={require("../assets/cart_icon.png")}
-               style={styles.logoImage}
-               resizeMode="contain"
-             />
-             <Text style={styles.headerIcon}>⚙️</Text>
-           </View>
+    <View style={styles.container}>
+      {/* Sidebar Drawer Menu */}
+      {menuVisible && (
+        <TouchableOpacity
+          style={styles.backdrop}
+          activeOpacity={1}
+          onPress={toggleMenu}
+        >
+          <Animated.View
+            style={[styles.drawer, { transform: [{ translateX: slideAnim }] }]}
+          >
+            <TouchableOpacity style={styles.backButton} onPress={toggleMenu}>
+              <Text style={styles.backButtonText}>←</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => goToScreen?.("furniture")}
+            >
+              <Text style={styles.menuText}>Furniture</Text>
+            </TouchableOpacity>
+
+            <View style={styles.menuItem}>
+              <Text style={styles.menuText}>Home Office</Text>
+            </View>
+            <View style={styles.menuItem}>
+              <Text style={styles.menuText}>Home Decoration</Text>
+            </View>
+            <View style={styles.menuItem}>
+              <Text style={styles.menuText}>Help</Text>
+            </View>
+
+            <View style={styles.drawerBottomImage}>
+              <Image
+                source={require("../assets/cart_icon.png")}
+                style={styles.sfImage}
+                resizeMode="contain"
+              />
+            </View>
+          </Animated.View>
+        </TouchableOpacity>
+      )}
+
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={toggleMenu}>
+          <Text style={styles.headerIcon}>☰</Text>
+        </TouchableOpacity>
+        <Image
+          source={require("../assets/cart_icon.png")}
+          style={styles.logoImage}
+          resizeMode="contain"
+        />
+        <Text style={styles.headerIcon}>⚙️</Text>
+      </View>
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>
@@ -229,9 +235,7 @@ const LivingRoomScreen: React.FC<LivingRoomScreenProps> = ({
 
               <TouchableOpacity
                 style={styles.arButton}
-                onPress={() =>
-                  goToScreen("ar", { uri: selectedItem.glbUri })
-                }
+                onPress={() => goToScreen("ar", { uri: selectedItem.glbUri })}
               >
                 <Text style={styles.arButtonText}>AR VIEW</Text>
               </TouchableOpacity>
@@ -272,7 +276,9 @@ const LivingRoomScreen: React.FC<LivingRoomScreenProps> = ({
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>You are not Logged in.</Text>
-            <Text style={styles.modalText}>Do you want to Login to your Account or Create an Account?</Text>
+            <Text style={styles.modalText}>
+              Do you want to Login to your Account or Create an Account?
+            </Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 onPress={() => setShowModal(false)}
@@ -500,7 +506,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginRight: 5,
     marginTop: 10,
-    maxWidth: 180
+    maxWidth: 180,
   },
   modalButtonText: {
     color: "#fff",
@@ -567,6 +573,4 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 20,
   },
-
 });
-

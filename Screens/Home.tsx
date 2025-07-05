@@ -16,7 +16,6 @@ interface HomeScreenProps {
   goToScreen?: (screen: Screen) => void;
 }
 
-
 const HomeScreen: React.FC<HomeScreenProps> = ({
   onEnterShop,
   onCart,
@@ -25,7 +24,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const screenWidth = Dimensions.get("window").width;
   const [menuVisible, setMenuVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-screenWidth)).current;
-
 
   const toggleMenu = () => {
     if (menuVisible) {
@@ -76,6 +74,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             <View style={styles.menuItem}>
               <Text style={styles.menuText}>Help</Text>
             </View>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => goToScreen?.("UploadF")}
+            >
+              <Text style={styles.menuText}>Upload Furniture</Text>
+            </TouchableOpacity>
 
             <View style={styles.drawerBottomImage}>
               <Image

@@ -1,29 +1,25 @@
-// Import the functions you need from the SDKs you need
+// firebase/firebaseconfig.ts
+
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+import { getDatabase } from "firebase/database";
+import { getAuth } from "firebase/auth"; // ✅ No initializeAuth needed here
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyD6v8BobHXg6LPlAna23F5Msbyj-ZjD6s4",
-  authDomain: "shopfurar.firebaseapp.com",
-  projectId: "shopfurar",
-  storageBucket: "shopfurar.firebasestorage.app",
-  messagingSenderId: "63848347199",
-  appId: "1:63848347199:web:21154d963d1e4692aeea8a",
-  measurementId: "G-H2D2HPF42P"
+  apiKey: "AIzaSyCPVFY0jgnjv49ItkeoThdLgUh8WpNOCII",
+  authDomain: "shopfur-f0673.firebaseapp.com",
+  databaseURL: "https://shopfur-f0673-default-rtdb.firebaseio.com",
+  projectId: "shopfur-f0673",
+  storageBucket: "shopfur-f0673.firebasestorage.app",
+  messagingSenderId: "980572185774",
+  appId: "1:980572185774:web:d83a99459af94d6754b93f",
+  measurementId: "G-EY6LNPWYBZ"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const firestore = getFirestore(app);  // Initialize Firestore
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(ReactNativeAsyncStorage)
-});
-export { auth };
-export { firestore }; 
+
+const firestore = getFirestore(app);
+const database = getDatabase(app);
+const auth = getAuth(app); // Use default web persistence
+
+export { app, firestore, database, auth };

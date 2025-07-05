@@ -3,11 +3,14 @@ import {
   ViroARSceneNavigator,
   Viro3DObject,
   ViroAmbientLight,
+  ViroDirectionalLight,
   ViroARPlaneSelector,
   ViroBox,
   ViroMaterials,
+  ViroSpotLight,
+  ViroQuad,
 } from "@reactvision/react-viro";
-import React, { Component, useState } from "react";
+import React, { Component } from "react";
 import { StyleSheet, TouchableOpacity, Text, View } from "react-native";
 
 interface ARSceneProps {
@@ -25,15 +28,15 @@ interface HelloWorldSceneARState {
   rotation: [number, number, number];
   lastPinchScale: number;
   lastRotationY: number;
+  isDragging: boolean;
 }
 
-// ✅ REGISTER MATERIALS AT TOP (ONCE)
 ViroMaterials.createMaterials({
-  greenBox: {
-    diffuseColor: "#00ff00",
-  },
-  redBox: {
-    diffuseColor: "#ff3333",
+  greenBox: { diffuseColor: "#00ff00" },
+  redBox: { diffuseColor: "#ff3333" },
+  fakeShadow: {
+    lightingModel: "Lambert",
+    diffuseTexture: require("../assets/Shadow.png"),
   },
 });
 
@@ -44,19 +47,18 @@ class HelloWorldSceneAR extends Component<
   constructor(props: HelloWorldSceneARProps) {
     super(props);
     this.state = {
-      position: [0, -1, -2], // Center in front of user
-      scale: [0.3, 0.3, 0.3],
+      position: [0, -1, -3.5],
+      scale: [0.4, 0.4, 0.4],
       rotation: [0, 0, 0],
-      lastPinchScale: 0.3,
+      lastPinchScale: 0.4,
       lastRotationY: 0,
+      isDragging: false,
     };
   }
 
   onPinch = (pinchState: number, scaleFactor: number) => {
     if (pinchState === 3) {
-      this.setState((prev) => ({
-        lastPinchScale: prev.scale[0],
-      }));
+      this.setState((prev) => ({ lastPinchScale: prev.scale[0] }));
       return;
     }
 
@@ -64,14 +66,13 @@ class HelloWorldSceneAR extends Component<
       Math.max(this.state.lastPinchScale * scaleFactor, 0.2),
       3.0
     );
+
     this.setState({ scale: [newScale, newScale, newScale] });
   };
 
   onRotate = (rotateState: number, rotationFactor: number) => {
     if (rotateState === 3) {
-      this.setState((prev) => ({
-        lastRotationY: prev.rotation[1],
-      }));
+      this.setState((prev) => ({ lastRotationY: prev.rotation[1] }));
       return;
     }
 
@@ -85,11 +86,11 @@ class HelloWorldSceneAR extends Component<
 
   onDoubleTap = () => {
     this.setState({
-      position: [0, -1, -2],
+      position: [0, -1, -3.5],
       rotation: [0, 0, 0],
-      scale: [0.3, 0.3, 0.3],
+      scale: [0.4, 0.4, 0.4],
       lastRotationY: 0,
-      lastPinchScale: 0.3,
+      lastPinchScale: 0.4,
     });
   };
 
@@ -99,33 +100,66 @@ class HelloWorldSceneAR extends Component<
   };
 
   render() {
+    const { uri } = this.props;
+    const { position, scale, rotation } = this.state;
+
     return (
       <ViroARScene>
-        <ViroAmbientLight color="#FFFFFF" intensity={500} />
+        <ViroAmbientLight color="#ffffff" intensity={300} />
+        <ViroDirectionalLight
+          color="#ffffff"
+          direction={[-1, -1, -0.5]}
+          intensity={600}
+          castsShadow={true}
+        />
+        <ViroSpotLight
+          innerAngle={5}
+          outerAngle={90}
+          direction={[0, -1, 0]}
+          position={[0, 3, 0]}
+          color="#ffffff"
+          intensity={800}
+          castsShadow={true}
+        />
 
         <ViroARPlaneSelector />
 
-        {/* Bounding Box Indicator */}
-        <ViroBox
-          position={this.state.position}
-          scale={[0.3, 0.01, 0.3]}
-          materials={this.getBoundaryMaterial()}
-          opacity={0.6}
+        {/* Fake shadow */}
+        <ViroQuad
+          rotation={[-90, 0, 0]}
+          width={1.5}
+          height={1.5}
+          position={[position[0], position[1] - 0.01, position[2]]}
+          materials={["fakeShadow"]}
+          opacity={0.5}
+          lightReceivingBitMask={3}
+          shadowCastingBitMask={2}
         />
 
-        {/* Always visible model */}
-        <Viro3DObject
-          source={{ uri: this.props.uri }}
-          type="GLB"
-          position={this.state.position}
-          scale={this.state.scale}
-          rotation={this.state.rotation}
-          onPinch={this.onPinch}
-          onRotate={this.onRotate}
-          onDrag={this.onDrag}
-          onClick={this.onDoubleTap}
-          dragType="FixedToWorld"
+        {/* Placement indicator */}
+        <ViroBox
+          position={position}
+          scale={[0.3, 0.01, 0.3]}
+          materials={this.getBoundaryMaterial()}
+          opacity={0.5}
         />
+
+        {uri ? (
+          <Viro3DObject
+            source={{ uri }}
+            type="GLB"
+            position={position}
+            scale={scale}
+            rotation={rotation}
+            onPinch={this.onPinch}
+            onRotate={this.onRotate}
+            onDrag={this.onDrag}
+            onClick={this.onDoubleTap}
+            dragType="FixedToWorld"
+          />
+        ) : (
+          <Text>Model URI missing.</Text>
+        )}
       </ViroARScene>
     );
   }
@@ -151,10 +185,7 @@ export default function ARScene({ uri, goBack }: ARSceneProps) {
 
 const styles = StyleSheet.create({
   f1: { flex: 1 },
-  container: {
-    flex: 1,
-    position: "relative",
-  },
+  container: { flex: 1, position: "relative" },
   backButton: {
     position: "absolute",
     top: 40,

@@ -22,5 +22,7 @@ export type Screen =
   | "lreg"
   | "profile"
   | "profileSetup"
+  | "UploadF"
+  
   
 

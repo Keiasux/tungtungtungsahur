@@ -1,4 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import "../firebase/firebaseConfig";
+import { auth, firestore } from "../firebase/firebaseConfig";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+
 import LoadingScreen from "./LoadingScreen";
 import CartScreen from "./CartScreen";
 import HomeScreen from "./Home";
@@ -16,8 +20,8 @@ import LRegScreen from "./lreg";
 import Profile from "./Profile";
 import NewlyUinfo from "./newlyUinfo";
 import ProfileSetupScreen from "./ProfileSetupScreen";
-import "../firebase/firebaseConfig";
-
+import FurnitureUploadScreen from "./UploadF";
+import AdminDashboardScreen from "./adminDashboard";
 
 export type Screen =
   | "loading"
@@ -44,10 +48,12 @@ export type Screen =
   | "droomt"
   | "lreg"
   | "intro"
-  | "profileSetup";
+  | "profileSetup"
+  | "UploadF"
+  | "adminDashb";
 
 export interface CartItem {
-  id: number;
+  id: string;
   name: string;
   price: number;
   quantity: number;
@@ -60,32 +66,71 @@ const App = () => {
   const [showIntro, setShowIntro] = useState(true);
   const [screenParams, setScreenParams] = useState<any>(null);
 
+  // 🔄 Fetch cart on user login
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        const cartRef = doc(firestore, "carts", user.uid);
+        const docSnap = await getDoc(cartRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setCartItems(data.items || []);
+        }
+      } else {
+        setCartItems([]); // 🔥 Clear cart when logged out
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // 🛒 Sync to Firestore
+  const syncCartToFirestore = async (items: CartItem[]) => {
+    const user = auth.currentUser;
+    if (!user) return;
+    const cartRef = doc(firestore, "carts", user.uid);
+    await setDoc(cartRef, { items });
+  };
 
   const addToCart = (newItem: CartItem) => {
+    const user = auth.currentUser;
+    if (!user) {
+      alert("Please log in to add items to your cart.");
+      setScreen("lreg"); // 👈 or your login/register screen
+      return;
+    }
+
     setCartItems((prev) => {
       const existing = prev.find((item) => item.id === newItem.id);
-      if (existing) {
-        return prev.map((item) =>
-          item.id === newItem.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      } else {
-        return [...prev, { ...newItem, quantity: 1 }];
-      }
+      const updated = existing
+        ? prev.map((item) =>
+            item.id === newItem.id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          )
+        : [...prev, { ...newItem, quantity: 1 }];
+
+      syncCartToFirestore(updated);
+      return updated;
     });
   };
 
-  const incrementItem = (id: number) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
+  const incrementItem = (id: string) => {
+    setCartItems((prev) => {
+      const updated = prev.map((item) =>
         item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
+      );
+      syncCartToFirestore(updated);
+      return updated;
+    });
   };
 
-  const removeItem = (id: number) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
+  const removeItem = (id: string) => {
+    setCartItems((prev) => {
+      const updated = prev.filter((item) => item.id !== id);
+      syncCartToFirestore(updated);
+      return updated;
+    });
   };
 
   const totalPrice = () =>
@@ -95,7 +140,7 @@ const App = () => {
     if (target === "ar" && params?.uri) {
       setArUri(params.uri);
     }
-    setScreenParams(params ?? null); // 👈 save passed params
+    setScreenParams(params ?? null);
     setScreen(target);
   };
 
@@ -108,9 +153,20 @@ const App = () => {
       />
     );
 
+  if (screen === "adminDashb")
+    return <AdminDashboardScreen goToScreen={goToScreen} />;
+
   if (screen === "intro")
     return <NewlyUinfo onFinish={() => setScreen("home")} />;
-  
+
+  if (screen === "UploadF")
+    return (
+      <FurnitureUploadScreen
+        goBack={() => setScreen("home")}
+        goToScreen={goToScreen}
+      />
+    );
+
   if (screen === "lreg") return <LRegScreen goToScreen={goToScreen} />;
 
   if (screen === "profileSetup" && screenParams)
@@ -120,7 +176,6 @@ const App = () => {
         route={{ params: screenParams }}
       />
     );
-  
 
   if (screen === "home")
     return (
@@ -167,6 +222,9 @@ const App = () => {
       <LivingRoomScreen
         goBack={() => setScreen("furniture")}
         goToScreen={goToScreen}
+        // ❌ Remove these
+        // addToCart={(item) => addToCart({ ...item, quantity: 1 })}
+        // category="Sofa"
       />
     );
 
@@ -205,9 +263,7 @@ const App = () => {
     );
 
   if (screen === "profile")
-    return (
-      <Profile goToScreen={goToScreen} goBack={() => setScreen("home")} />
-    );
+    return <Profile goToScreen={goToScreen} goBack={() => setScreen("home")} />;
 
   if (screen === "inbox") return <HomeScreen goToScreen={goToScreen} />;
 
@@ -215,3 +271,6 @@ const App = () => {
 };
 
 export default App;
+function alert(arg0: string) {
+  throw new Error("Function not implemented.");
+}

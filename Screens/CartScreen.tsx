@@ -5,24 +5,61 @@ import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
+  Alert,
+  Linking,
 } from "react-native";
 import { CartItem } from "./App";
 
 interface CartScreenProps {
-  cartItems: CartItem[];
   onBack: () => void;
-  onIncrement: (id: number) => void;
-  onRemove: (id: number) => void;
   total: number;
+  cartItems: CartItem[];
+  onIncrement: (id: string) => void;
+  onRemove: (id: string) => void;
 }
 
 const CartScreen: React.FC<CartScreenProps> = ({
-  cartItems,
   onBack,
+  total,
+  cartItems,
   onIncrement,
   onRemove,
-  total,
 }) => {
+  const handlePayment = async () => {
+    try {
+      const response = await fetch("https://api.paymongo.com/v1/links", {
+        method: "POST",
+        headers: {
+          Authorization: "Basic " + btoa("sk_live_your_secret_key_here" + ":"), // 🛑 Replace with your real secret key
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          data: {
+            attributes: {
+              amount: total * 100, // Amount in centavos (₱1 = 100)
+              description: "Furniture Checkout",
+              remarks: "Thank you for shopping!",
+              payment_method_types: ["gcash"],
+              currency: "PHP",
+            },
+          },
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.data?.attributes?.checkout_url) {
+        Linking.openURL(result.data.attributes.checkout_url);
+      } else {
+        console.log("Error:", result);
+        Alert.alert("Payment failed", "Unable to create payment link.");
+      }
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "Something went wrong during payment.");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={onBack} style={styles.backBtn}>
@@ -33,7 +70,7 @@ const CartScreen: React.FC<CartScreenProps> = ({
 
       <FlatList
         data={cartItems}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.cartItem}>
             <View>
@@ -62,6 +99,14 @@ const CartScreen: React.FC<CartScreenProps> = ({
 
       <View style={styles.totalContainer}>
         <Text style={styles.totalText}>Total: ₱{total}</Text>
+
+        {/* PAYMONGO PAYMENT BUTTON */}
+        <TouchableOpacity
+          style={[styles.actionButton, { marginTop: 20 }]}
+          onPress={handlePayment}
+        >
+          <Text style={styles.buttonText}>Pay with GCash</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -90,8 +135,8 @@ const styles = StyleSheet.create({
   actions: { flexDirection: "row", alignItems: "center", gap: 8 },
   actionButton: {
     backgroundColor: "#C7AE93",
-    padding: 6,
-    borderRadius: 6,
+    padding: 10,
+    borderRadius: 10,
     marginLeft: 5,
   },
   buttonText: { fontWeight: "600", color: "#3E2E22" },
