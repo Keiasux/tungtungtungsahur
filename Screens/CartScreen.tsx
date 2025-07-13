@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,8 +6,22 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
-  Linking,
+  Modal,
+  ActivityIndicator,
+  Image,
 } from "react-native";
+import { firestore } from "../firebase/firebaseConfig";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  doc,
+  onSnapshot,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
+
 import { CartItem } from "./App";
 
 interface CartScreenProps {
@@ -16,6 +30,7 @@ interface CartScreenProps {
   cartItems: CartItem[];
   onIncrement: (id: string) => void;
   onRemove: (id: string) => void;
+  userId: string;
 }
 
 const CartScreen: React.FC<CartScreenProps> = ({
@@ -24,39 +39,77 @@ const CartScreen: React.FC<CartScreenProps> = ({
   cartItems,
   onIncrement,
   onRemove,
+  userId,
 }) => {
-  const handlePayment = async () => {
-    try {
-      const response = await fetch("https://api.paymongo.com/v1/links", {
-        method: "POST",
-        headers: {
-          Authorization: "Basic " + btoa("sk_live_your_secret_key_here" + ":"), // 🛑 Replace with your real secret key
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          data: {
-            attributes: {
-              amount: total * 100, // Amount in centavos (₱1 = 100)
-              description: "Furniture Checkout",
-              remarks: "Thank you for shopping!",
-              payment_method_types: ["gcash"],
-              currency: "PHP",
-            },
-          },
-        }),
-      });
+  const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [referenceId, setReferenceId] = useState<string | null>(null);
+  const [paymentDocId, setPaymentDocId] = useState<string | null>(null);
 
-      const result = await response.json();
+  useEffect(() => {
+    if (!paymentDocId) return;
 
-      if (result.data?.attributes?.checkout_url) {
-        Linking.openURL(result.data.attributes.checkout_url);
-      } else {
-        console.log("Error:", result);
-        Alert.alert("Payment failed", "Unable to create payment link.");
+    const unsubscribe = onSnapshot(
+      doc(firestore, "payments", paymentDocId),
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.status === "approved") {
+            setModalVisible(false);
+            Alert.alert("✅ Payment Approved", "Thank you for your payment!");
+            setPaymentDocId(null);
+          } else if (data.status === "declined") {
+            setModalVisible(false);
+            Alert.alert("❌ Payment Declined", "Please contact admin.");
+            setPaymentDocId(null);
+          }
+        }
       }
-    } catch (err) {
-      console.error(err);
-      Alert.alert("Error", "Something went wrong during payment.");
+    );
+
+    return () => unsubscribe();
+  }, [paymentDocId]);
+
+  const startPayment = async () => {
+    try {
+      setLoading(true);
+      const generatedRef = Math.random().toString(36).substring(2, 10);
+
+      // 🔎 Check if user already has a pending payment
+      const q = query(
+        collection(firestore, "payments"),
+        where("userId", "==", userId),
+        where("status", "==", "pending")
+      );
+
+      const existing = await getDocs(q);
+
+      if (!existing.empty) {
+        // ✅ Reuse existing pending payment
+        const existingDoc = existing.docs[0];
+        setPaymentDocId(existingDoc.id);
+        setReferenceId(existingDoc.data().referenceId);
+        setModalVisible(true);
+      } else {
+        // 🆕 Create new payment doc
+        const docRef = await addDoc(collection(firestore, "payments"), {
+          cartItems,
+          amount: total,
+          status: "pending",
+          method: "QRPh",
+          referenceId: generatedRef,
+          userId: userId,
+          createdAt: serverTimestamp(),
+        });
+        setPaymentDocId(docRef.id);
+        setReferenceId(generatedRef);
+        setModalVisible(true);
+      }
+    } catch (e) {
+      console.error(e);
+      Alert.alert("Error", "Failed to record payment attempt.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -65,7 +118,6 @@ const CartScreen: React.FC<CartScreenProps> = ({
       <TouchableOpacity onPress={onBack} style={styles.backBtn}>
         <Text style={styles.buttonText}>← Back</Text>
       </TouchableOpacity>
-
       <Text style={styles.title}>Your Cart</Text>
 
       <FlatList
@@ -99,15 +151,64 @@ const CartScreen: React.FC<CartScreenProps> = ({
 
       <View style={styles.totalContainer}>
         <Text style={styles.totalText}>Total: ₱{total}</Text>
-
-        {/* PAYMONGO PAYMENT BUTTON */}
         <TouchableOpacity
           style={[styles.actionButton, { marginTop: 20 }]}
-          onPress={handlePayment}
+          onPress={startPayment}
         >
-          <Text style={styles.buttonText}>Pay with GCash</Text>
+          {loading ? (
+            <ActivityIndicator size="small" color="#3E2E22" />
+          ) : (
+            <Text style={styles.buttonText}>Pay with QRPh</Text>
+          )}
         </TouchableOpacity>
       </View>
+
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.title}>Scan to Pay</Text>
+
+            <View style={{ alignItems: "center", marginVertical: 10 }}>
+              <Text style={styles.itemText}>Castro-G19-Thesis</Text>
+              <Image
+                source={require("../assets/code_hLnVjWzpqhh7xsKZLFg3EZcV.jpg")}
+                style={{ width: 250, height: 350, resizeMode: "contain" }}
+              />
+              <Text style={styles.itemText}>Basta kaya i-scan, pwede yan!</Text>
+
+              {referenceId && (
+                <Text style={{ fontSize: 12, color: "#555", marginTop: 5 }}>
+                  Reference ID: {referenceId}
+                </Text>
+              )}
+
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: "#B00020",
+                  marginTop: 10,
+                  textAlign: "center",
+                }}
+              >
+                ⚠ Please notify admin after paying. Admin will confirm your
+                payment manually.
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.actionButton, { marginTop: 10 }]}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.buttonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -142,4 +243,16 @@ const styles = StyleSheet.create({
   buttonText: { fontWeight: "600", color: "#3E2E22" },
   totalContainer: { marginTop: 20, alignItems: "flex-end" },
   totalText: { fontSize: 18, fontWeight: "bold", color: "#3E2E22" },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 12,
+    alignItems: "center",
+  },
 });

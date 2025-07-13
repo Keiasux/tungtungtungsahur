@@ -195,9 +195,12 @@ const App = () => {
       />
     );
 
+  const currentUser = auth.currentUser;
+
   if (screen === "cart")
     return (
       <CartScreen
+        userId={currentUser ? currentUser.uid : "guest"}
         cartItems={cartItems}
         onBack={() => setScreen("home")}
         onIncrement={incrementItem}
