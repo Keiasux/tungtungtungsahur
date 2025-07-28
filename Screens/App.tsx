@@ -22,6 +22,8 @@ import NewlyUinfo from "./newlyUinfo";
 import ProfileSetupScreen from "./ProfileSetupScreen";
 import FurnitureUploadScreen from "./UploadF";
 import AdminDashboardScreen from "./adminDashboard";
+import UnityARScene from "./UnityARScene";
+
 
 export type Screen =
   | "loading"
@@ -50,7 +52,9 @@ export type Screen =
   | "intro"
   | "profileSetup"
   | "UploadF"
-  | "adminDashb";
+  | "adminDashb"
+  | "uar";
+
 
 export interface CartItem {
   id: string;
@@ -152,6 +156,9 @@ const App = () => {
         }}
       />
     );
+
+  if (screen === "uar") return <UnityARScene goBack={() => setScreen("home")} />;
+
 
   if (screen === "adminDashb")
     return <AdminDashboardScreen goToScreen={goToScreen} />;
